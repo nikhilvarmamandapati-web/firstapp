@@ -1,0 +1,30 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(title: const Text("responsive ai")),
+        body: Center(
+          child: width < 600
+              ? const Text(
+                  "small screen",
+                  style: TextStyle(fontSize: 25),
+                )
+              : const Text(
+                  "large screen",
+                  style: TextStyle(fontSize: 25),
+                ),
+        ),
+      ),
+    );
+  }
+}
