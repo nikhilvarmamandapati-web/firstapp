@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+// Custom FoodCard Widget
+class FoodCard extends StatelessWidget {
+  final String foodName;
+  final double price;
+  final IconData icon;
+
+  const FoodCard({
+    super.key,
+    required this.foodName,
+    required this.price,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.all(10),
+      child: ListTile(
+        leading: Icon(
+          icon,
+          size: 45,
+        ),
+
+        title: Text(
+          foodName,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        subtitle: Text(
+          "₹${price.toStringAsFixed(0)}",
+          style: const TextStyle(fontSize: 16),
+        ),
+
+        trailing: ElevatedButton(
+          onPressed: () {
+            print("$foodName added to cart");
+          },
+          child: const Text("ADD TO CART"),
+        ),
+      ),
+    );
+  }
+}
+
+// Main Application
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Food Ordering App"),
+        ),
+
+        body: const Column(
+          children: [
+            FoodCard(
+              foodName: "Pizza",
+              price: 250,
+              icon: Icons.local_pizza,
+            ),
+
+            FoodCard(
+              foodName: "Burger",
+              price: 150,
+              icon: Icons.lunch_dining,
+            ),
+
+            FoodCard(
+              foodName: "Biryani",
+              price: 200,
+              icon: Icons.rice_bowl,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
