@@ -1,0 +1,168 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Animation Effects',
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+      ),
+      home: const AnimationEffectsPage(),
+    );
+  }
+}
+
+class AnimationEffectsPage extends StatefulWidget {
+  const AnimationEffectsPage({super.key});
+
+  @override
+  State<AnimationEffectsPage> createState() =>
+      _AnimationEffectsPageState();
+}
+
+class _AnimationEffectsPageState extends State<AnimationEffectsPage> {
+  bool animate = false;
+
+  void startAnimation() {
+    setState(() {
+      animate = !animate;
+    });
+  }
+
+  Widget animationBox({
+    required String title,
+    required Color color,
+    required Widget child,
+  }) {
+    return Column(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        child,
+        const SizedBox(height: 25),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Animation Effects'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // FADE ANIMATION
+            animationBox(
+              title: 'Fade Animation',
+              color: Colors.red,
+              child: AnimatedOpacity(
+                duration: const Duration(seconds: 1),
+                opacity: animate ? 0.2 : 1.0,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  color: Colors.red,
+                  child: const Center(
+                    child: Text(
+                      'Fade',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // SLIDE ANIMATION
+            animationBox(
+              title: 'Slide Animation',
+              color: Colors.blue,
+              child: AnimatedSlide(
+                duration: const Duration(seconds: 1),
+                offset: animate
+                    ? const Offset(1.5, 0)
+                    : Offset.zero,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  color: Colors.blue,
+                  child: const Center(
+                    child: Text(
+                      'Slide',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // SCALE ANIMATION
+            animationBox(
+              title: 'Scale Animation',
+              color: Colors.green,
+              child: AnimatedScale(
+                duration: const Duration(seconds: 1),
+                scale: animate ? 1.5 : 1.0,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  color: Colors.green,
+                  child: const Center(
+                    child: Text(
+                      'Scale',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // ROTATION ANIMATION
+            animationBox(
+              title: 'Rotation Animation',
+              color: Colors.orange,
+              child: AnimatedRotation(
+                duration: const Duration(seconds: 1),
+                turns: animate ? 1.0 : 0.0,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  color: Colors.orange,
+                  child: const Center(
+                    child: Text(
+                      'Rotate',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            ElevatedButton(
+              onPressed: startAnimation,
+              child: const Text('Animate'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
