@@ -1,0 +1,536 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const WaterApp());
+}
+
+class WaterApp extends StatelessWidget {
+  const WaterApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Smart Water Tracker',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const WaterHome(),
+    );
+  }
+}
+
+class WaterHome extends StatefulWidget {
+  const WaterHome({super.key});
+
+  @override
+  State<WaterHome> createState() => _WaterHomeState();
+}
+
+class _WaterHomeState extends State<WaterHome> {
+  // Daily water goal
+  final int goal = 2000;
+
+  // Total water consumed
+  int water = 0;
+
+  // Number of entries
+  int entryCount = 0;
+
+  // Store individual entries
+  List<int> entries = [];
+
+  // Add water
+  void addWater(int amount) {
+    // Input validation
+    if (amount <= 0) {
+      showError('Water amount must be greater than 0 ml.');
+      return;
+    }
+
+    setState(() {
+      water += amount;
+      entryCount++;
+      entries.add(amount);
+    });
+  }
+
+  // Show error message
+  void showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  // Reset confirmation
+  void confirmReset() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Reset Water Intake?'),
+          content: const Text(
+            'Are you sure you want to reset today\'s water intake?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                resetWater();
+                Navigator.pop(context);
+              },
+              child: const Text('Reset'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Reset data
+  void resetWater() {
+    setState(() {
+      water = 0;
+      entryCount = 0;
+      entries.clear();
+    });
+  }
+
+  // Calculate remaining water
+  int get remaining {
+    if (water >= goal) {
+      return 0;
+    }
+
+    return goal - water;
+  }
+
+  // Calculate completion percentage
+  int get completionPercentage {
+    if (goal == 0) {
+      return 0;
+    }
+
+    double percentage = (water / goal) * 100;
+
+    if (percentage > 100) {
+      return 100;
+    }
+
+    return percentage.round();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double progress = water / goal;
+
+    if (progress > 1) {
+      progress = 1;
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('💧 Smart Water Tracker'),
+        centerTitle: true,
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+
+            // Water icon
+            const Icon(
+              Icons.water_drop,
+              size: 80,
+              color: Colors.blue,
+            ),
+
+            const SizedBox(height: 10),
+
+            const Text(
+              'Daily Hydration',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            // Total consumed
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+
+                child: Column(
+                  children: [
+                    const Text(
+                      'Total Consumed',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      '$water mL',
+                      style: const TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+
+                    Text(
+                      'Daily Goal: $goal mL',
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // Progress bar
+            LinearProgressIndicator(
+              value: progress,
+              minHeight: 15,
+              backgroundColor: Colors.grey.shade300,
+              color: Colors.blue,
+            ),
+
+            const SizedBox(height: 10),
+
+            // Completion percentage
+            Text(
+              '$completionPercentage% Completed',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Information cards
+            Row(
+              children: [
+                Expanded(
+                  child: infoCard(
+                    'Remaining',
+                    '$remaining mL',
+                    Icons.water,
+                    Colors.orange,
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: infoCard(
+                    'Entries',
+                    '$entryCount',
+                    Icons.format_list_numbered,
+                    Colors.purple,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+
+            const Text(
+              'Add Water',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // Quick water buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                waterButton(250),
+                waterButton(500),
+                waterButton(750),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // Custom amount input
+            const Text(
+              'Enter Custom Amount',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            CustomWaterInput(
+              onAdd: addWater,
+            ),
+
+            const SizedBox(height: 25),
+
+            // Reset button
+            ElevatedButton.icon(
+              onPressed: confirmReset,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Reset Today'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            // History button
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HistoryScreen(
+                      entries: entries,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.history),
+              label: const Text('View Today\'s Entries'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Water button
+  Widget waterButton(int amount) {
+    return ElevatedButton(
+      onPressed: () {
+        addWater(amount);
+      },
+      child: Text('$amount mL'),
+    );
+  }
+
+  // Information card
+  Widget infoCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(15),
+
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 30,
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                color: Colors.grey,
+              ),
+            ),
+
+            const SizedBox(height: 5),
+
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// ------------------------------------------------------------
+// CUSTOM WATER INPUT
+// ------------------------------------------------------------
+
+class CustomWaterInput extends StatefulWidget {
+  final Function(int) onAdd;
+
+  const CustomWaterInput({
+    super.key,
+    required this.onAdd,
+  });
+
+  @override
+  State<CustomWaterInput> createState() => _CustomWaterInputState();
+}
+
+class _CustomWaterInputState extends State<CustomWaterInput> {
+  final TextEditingController controller =
+      TextEditingController();
+
+  void submit() {
+    final text = controller.text.trim();
+
+    // Empty input
+    if (text.isEmpty) {
+      showError('Please enter a water amount.');
+      return;
+    }
+
+    final amount = int.tryParse(text);
+
+    // Invalid number
+    if (amount == null) {
+      showError('Please enter a valid number.');
+      return;
+    }
+
+    // Negative or zero
+    if (amount <= 0) {
+      showError(
+        'Water amount must be greater than 0 ml.',
+      );
+      return;
+    }
+
+    widget.onAdd(amount);
+
+    controller.clear();
+  }
+
+  void showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              hintText: 'Enter mL',
+              border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.water_drop),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 10),
+
+        ElevatedButton(
+          onPressed: submit,
+          child: const Text('Add'),
+        ),
+      ],
+    );
+  }
+}
+
+
+// ------------------------------------------------------------
+// HISTORY SCREEN
+// ------------------------------------------------------------
+
+class HistoryScreen extends StatelessWidget {
+  final List<int> entries;
+
+  const HistoryScreen({
+    super.key,
+    required this.entries,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Today\'s Entries'),
+      ),
+
+      body: entries.isEmpty
+          ? const Center(
+              child: Text(
+                'No water entries yet.',
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+            )
+          : ListView.builder(
+              itemCount: entries.length,
+
+              itemBuilder: (context, index) {
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue,
+                    child: Text(
+                      '${index + 1}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+
+                  title: Text(
+                    '${entries[index]} mL',
+                  ),
+
+                  subtitle: const Text(
+                    'Water intake',
+                  ),
+
+                  trailing: const Icon(
+                    Icons.water_drop,
+                    color: Colors.blue,
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
